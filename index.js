@@ -3,20 +3,19 @@
     if (typeof root.define === 'function' && root.define.amd) {
         // AMD. Register as an anonymous module.
         root.define(['exports'], factory);
-    /* istanbul ignore next */
     } else if (typeof module === 'object') {
         // CommonJS
         module.exports = factory();
-    /* istanbul ignore next */
     } else {
         // Browser globals
         root.diff = factory();
     }
 }(this, function () {
 
-    var DIFF_NOT_MODIFIED = diff.NOT_MODIFIED = 0;
-    var DIFF_CREATED = diff.CREATED = 1;
-    var DIFF_DELETED = diff.DELETED = -1;
+    var DIFF_NOT_MODIFIED = 0;
+    var DIFF_CREATED = 1;
+    var DIFF_MOVED = 2;
+    var DIFF_DELETED = -1;
 
     /**
      * Calculates difference between two arrays.
@@ -51,12 +50,26 @@
 
             } else if (listItem !== prevItem) {
 
-                var isCreated = prev.indexOf(listItem) === -1;
-                var isDeleted = list.indexOf(prevItem) === -1;
+                var prevItemIndex = prev.indexOf(listItem);
+                var listItemIndex = list.indexOf(prevItem);
+
+                var isCreated = prevItemIndex === -1;
+                var isDeleted = listItemIndex === -1;
 
                 if (isCreated) {
                     diff.push({ item: listItem, state: DIFF_CREATED });
                     ++iList;
+                }
+
+                if (!isCreated && !isDeleted) { // moved
+                    diff.push({
+                        item: listItem,
+                        state: DIFF_MOVED,
+                        oldIndex: prevItemIndex,
+                        newIndex: iList
+                    });
+                    ++iList;
+                    ++iPrev;
                 }
 
                 if (isDeleted) {
@@ -73,6 +86,13 @@
 
         return diff;
     }
+
+    // exports ////////////////////////////////////////////////////////////////
+
+    diff.NOT_MODIFIED = DIFF_NOT_MODIFIED;
+    diff.CREATED = DIFF_CREATED;
+    diff.MOVED = DIFF_MOVED;
+    diff.DELETED = DIFF_DELETED;
 
     return diff;
 }));

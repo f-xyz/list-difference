@@ -3,30 +3,32 @@ If elements are objects it compares them by reference.
 
 Let's consider two lists:
 
-`[1, 2, 4, 5]` and
-`[1, 2, 3, 6]`
+A `[1, 2, 3, 5, 6]` and B `[2, 1, 3, 4, 5]`
 
-* 1 1 -> not changed
-* 2 2 -> not changed
-*   3 -> deleted
-* 4   -> created
-* 5   -> created
-*   6 -> deleted
+--------------------------------------
+|A Item | B Item | State             |
+|------------------------------------|
+| 1     | 2      | moved from 1 to 0 |
+| 2     | 1      | moved from 0 to 1 |
+| 3     | 3      | not modified      |
+|       | 4      | deleted           |
+| 5     | 5      | not modified      |
+| 6     |        | created           |
+--------------------------------------
 
 `diff` will return an array of { item: T, state: number }.
 Where state means:
   * 0 - not modified
   * 1 - created
+  * 2 - moved
   * -1 - deleted
 
 Returned value will look like:
 ```
-[
-    { item: 1: state: 0 },
-    { item: 2: state: 0 },
-    { item: 3: state: -1 },
-    { item: 4: state: 1 },
-    { item: 5: state: 1 },
-    { item: 6: state: -1 },
-]
+[ { item: 1, state: 2, oldIndex: 1, newIndex: 0 },
+  { item: 2, state: 2, oldIndex: 0, newIndex: 1 },
+  { item: 3, state: 0 },
+  { item: 4, state: -1 },
+  { item: 5, state: 0 },
+  { item: 6, state: 1 } ]
 ```
