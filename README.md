@@ -5,16 +5,14 @@ Let's consider two lists:
 
 A `[1, 2, 3, 5, 6]` and B `[2, 1, 3, 4, 5]`
 
---------------------------------------
 |A Item | B Item | State             |
-|------------------------------------|
+|-------|--------|-------------------|
 | 1     | 2      | moved from 1 to 0 |
 | 2     | 1      | moved from 0 to 1 |
 | 3     | 3      | not modified      |
 |       | 4      | deleted           |
 | 5     | 5      | not modified      |
 | 6     |        | created           |
---------------------------------------
 
 `diff` will return an array of { item: T, state: number }.
 Where state means:
