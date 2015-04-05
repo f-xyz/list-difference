@@ -12,25 +12,41 @@
     }
 }(this, function () {
 
-    var uniqueKey = 0;
-
+    var lastUniqueId = 0;
+    var HASH_FIELD_NAME = '$$hashKey';
     var DIFF_NOT_MODIFIED = 0;
     var DIFF_CREATED = 1;
     var DIFF_MOVED = 2;
     var DIFF_DELETED = -1;
 
+    /**
+     * Returns auto incremental unique ID as integer.
+     * @returns {number}
+     */
     function getUniqueKey() {
-        return uniqueKey++;
+        return lastUniqueId++;
     }
 
+    /**
+     * Returns x if it is not undefined, y otherwise.
+     * @param x
+     * @param y
+     * @returns {*}
+     */
     function maybe(x, y) {
         if (x !== undefined) return x;
         return y;
     }
 
-    function buildHashMap(list, uniqueKey) {
+    /**
+     *
+     * @param list
+     * @param uniqueKey
+     * @returns {{}}
+     */
+    function buildIndexMap(list, uniqueKey) {
         var map = {};
-        for (i = 0; i < list.length; ++i) {
+        for (var i = 0; i < list.length; ++i) {
             if (uniqueKey) {
                 map[list[i][uniqueKey]] = i;
             } else {
@@ -38,6 +54,24 @@
             }
         }
         return map;
+    }
+
+    /**
+     *
+     * @param {*[]} list
+     * @param {string} uniqueKey
+     * @returns {*[]}
+     */
+    function hashListItems(list, uniqueKey) {
+        for (var i = 0; i < list.length; ++i) {
+            var item = list[i];
+            if (typeof item === 'object' && item !== null) {
+                if (item[uniqueKey] === undefined) {
+                    item[uniqueKey] = getUniqueKey();
+                }
+            }
+        }
+        return list;
     }
 
     /**
@@ -51,19 +85,22 @@
      *   6 -> deleted
      * Returns array of { item: T, state: int }.
      * Where state means: 0 - not modified, 1 - created, -1 - deleted.
+     * @param {*[]} list
+     * @param {*[]} prev
+     * @param {string} [hashField]
      */
-    function diff(list, prev, fast, uniqueKey) {
+    function diff(list, prev, hashField) {
         var diff = [];
         var iList = 0;
         var iPrev = 0;
 
-        var listMap = {};
-        var prevMap = {};
-
-        if (fast) {
-            listMap = buildHashMap(list, uniqueKey);
-            prevMap = buildHashMap(prev, uniqueKey);
+        if (!hashField) {
+            hashListItems(list, HASH_FIELD_NAME);
+            hashListItems(prev, HASH_FIELD_NAME);
         }
+
+        var listIndexMap = buildIndexMap(list, hashField);
+        var prevIndexMap = buildIndexMap(prev, hashField);
 
         for (; iList < list.length || iPrev < prev.length;) {
             var listItem = list[iList];
@@ -84,17 +121,12 @@
                 var prevItemIndex;
                 var listItemIndex;
 
-                if (fast) {
-                    if (uniqueKey) {
-                        prevItemIndex = maybe(prevMap[listItem[uniqueKey]], -1);
-                        listItemIndex = maybe(listMap[prevItem[uniqueKey]], -1);
-                    } else {
-                        prevItemIndex = maybe(prevMap[listItem], -1);
-                        listItemIndex = maybe(listMap[prevItem], -1);
-                    }
+                if (hashField) {
+                    prevItemIndex = maybe(prevIndexMap[listItem[hashField]], -1);
+                    listItemIndex = maybe(listIndexMap[prevItem[hashField]], -1);
                 } else {
-                    prevItemIndex = prev.indexOf(listItem);
-                    listItemIndex = list.indexOf(prevItem);
+                    prevItemIndex = maybe(prevIndexMap[listItem], -1);
+                    listItemIndex = maybe(listIndexMap[prevItem], -1);
                 }
 
                 var isCreated = prevItemIndex === -1;
@@ -137,6 +169,9 @@
     diff.CREATED = DIFF_CREATED;
     diff.MOVED = DIFF_MOVED;
     diff.DELETED = DIFF_DELETED;
+    diff.getUniqueKey = getUniqueKey;
+    diff.hashListItems = hashListItems;
+    diff.buildIndexMap = buildIndexMap;
 
     return diff;
 }));

@@ -70,11 +70,12 @@ describe('unit tests', function () {
     describe('different item types', function () {
 
         it('should compare by reference', function () {
-            var a = { a: 1 };
-            var b = { a: 1 };
+            var a = { a: 1, id: 1 };
+            var b = { a: 1, id: 2 };
             var list = [a];
             var prev = [b];
-            diff(list, prev).should.eql([
+            var result = diff(list, prev, 'id');
+            result.should.eql([
                 { item: a, state: diff.CREATED },
                 { item: b, state: diff.DELETED }
             ]);
