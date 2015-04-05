@@ -31,9 +31,27 @@ function diff(list, prev) {
     var iList = 0;
     var iPrev = 0;
 
+    var listMap = {};
+    var prevMap = {};
+
+    var i;
+    for (i = 0; i < list.length; ++i) {
+        listMap[list[i]] = list.indexOf(list[i]);
+    }
+    for (i = 0; i < prev.length; ++i) {
+        prevMap[prev[i]] = prev.indexOf(prev[i]);
+    }
+
+    function maybe(x, y) {
+        if (x !== undefined) return x;
+        return y;
+    }
+
     for (; iList < list.length || iPrev < prev.length;) {
         var listItem = list[iList];
         var prevItem = prev[iPrev];
+
+        console.log('  %s: %s\t%s: %s', iList, listItem, iPrev, prevItem);
 
         if (iList >= list.length) {
 
@@ -47,12 +65,16 @@ function diff(list, prev) {
 
         } else if (listItem !== prevItem) {
 
-            var prevItemIndex = prev.indexOf(listItem);
-            var listItemIndex = list.indexOf(prevItem);
+            //var prevItemIndex = prev.indexOf(listItem);
+            //var listItemIndex = list.indexOf(prevItem);
+
+            var prevItemIndex = maybe(prevMap[listItem], -1);
+            var listItemIndex = maybe(listMap[prevItem], -1);
 
             var isCreated = prevItemIndex === -1;
             var isDeleted = listItemIndex === -1;
 
+            console.log('    %s, %s', prevItemIndex, listItemIndex);
             console.log('    item: %s, prev: %s -> created: %s, deleted: %s'.yellow,
                 listItem, prevItem, isCreated, isDeleted);
 
@@ -88,12 +110,6 @@ function diff(list, prev) {
             ++iList;
             ++iPrev;
         }
-
-        console.log('  %s: %s\t%s: %s',
-            iList,
-            colorByState(listItem, 0),
-            iPrev,
-            colorByState(prevItem, 0));
     }
 
     console.timeEnd('# time');

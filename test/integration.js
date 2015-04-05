@@ -14,12 +14,13 @@ describe('integration tests on big random arrays', function () {
         var addToList = Math.random() >= 0.5;
         var addToPrev = Math.random() >= 0.5;
 
-        if (addToList) list.push(i);
-        if (addToPrev) prev.push(i);
+        var x = { x: i };
+        if (addToList) list.push(x);
+        if (addToPrev) prev.push(x);
 
-        if      ( addToList &&  addToPrev) notModified.push(i);
-        else if ( addToList && !addToPrev) created.push(i);
-        else if (!addToList &&  addToPrev) deleted.push(i);
+        if      ( addToList &&  addToPrev) notModified.push(x);
+        else if ( addToList && !addToPrev) created.push(x);
+        else if (!addToList &&  addToPrev) deleted.push(x);
     }
 
     var number = Math.max(list.length, prev.length);
@@ -27,9 +28,18 @@ describe('integration tests on big random arrays', function () {
     var result = diff(list, prev);
     var duration = Date.now() - timeStart;
 
+    timeStart = Date.now();
+    result = diff(list, prev, true, 'x');
+    var durationFast = Date.now() - timeStart;
+
     it('comparing of ' + number + ' elements took ' + duration + ' ms', function () {
         // 0.04 is ok on average notebook
         duration.should.lt(0.1 * number);
+    });
+
+    it('FAST comparing of ' + number + ' elements took ' + durationFast + ' ms', function () {
+        // 0.04 is ok on average notebook
+        durationFast.should.lt(0.1 * number);
     });
 
     it('should determine not modified elements', function () {
