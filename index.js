@@ -12,15 +12,17 @@
     }
 }(this, function () {
 
-    var lastUniqueId = 0;
-    var HASH_FIELD_NAME = '$$hashKey';
+    var DEFAULT_HASH_FIELD = '$$hashKey';
+
     var DIFF_NOT_MODIFIED = 0;
     var DIFF_CREATED = 1;
     var DIFF_MOVED = 2;
     var DIFF_DELETED = -1;
 
+    var lastUniqueId = 0;
+
     /**
-     * Returns auto incremental unique ID as integer.
+     * Returns auto incremental unique ID as an integer.
      * @returns {number}
      */
     function getUniqueKey() {
@@ -95,8 +97,8 @@
         var iPrev = 0;
 
         if (!hashField) {
-            hashListItems(list, HASH_FIELD_NAME);
-            hashListItems(prev, HASH_FIELD_NAME);
+            hashListItems(list, DEFAULT_HASH_FIELD);
+            hashListItems(prev, DEFAULT_HASH_FIELD);
         }
 
         var listIndexMap = buildIndexMap(list, hashField);
