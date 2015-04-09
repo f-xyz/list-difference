@@ -8,16 +8,18 @@
         module.exports = factory();
     } else {
         // Browser globals
-        root.diff = factory();
+        root[factory.name] = factory();
     }
-}(this, function () {
+}(this, function diff() {
 
-    var lastUniqueId = 0;
-    var HASH_FIELD_NAME = '$$hashKey';
+    var TRACK_BY_FIELD = '$$listDiffHash';
+
     var DIFF_NOT_MODIFIED = 0;
     var DIFF_CREATED = 1;
     var DIFF_MOVED = 2;
     var DIFF_DELETED = -1;
+
+    var lastUniqueId = 0;
 
     /**
      * Returns auto incremental unique ID as integer.
@@ -39,39 +41,34 @@
     }
 
     /**
-     *
-     * @param list
-     * @param uniqueKey
+     * @param {Array} list
+     * @param {string} trackBy
      * @returns {{}}
      */
-    function buildIndexMap(list, uniqueKey) {
+    function buildHashToIndexMap(list, trackBy) {
         var map = {};
         for (var i = 0; i < list.length; ++i) {
-            if (uniqueKey) {
-                map[list[i][uniqueKey]] = i;
-            } else {
-                map[list[i]] = i;
+            var item = list[i];
+            if (trackBy) { // reference types
+                map[item[trackBy]] = i;
+            } else { // for value types
+                map[item] = i;
+                addHashFieldToListItem(item, TRACK_BY_FIELD);
             }
         }
         return map;
     }
 
     /**
-     *
-     * @param {*[]} list
-     * @param {string} uniqueKey
-     * @returns {*[]}
+     * @param item
+     * @param {string} trackBy
+     * @returns {*} item
      */
-    function hashListItems(list, uniqueKey) {
-        for (var i = 0; i < list.length; ++i) {
-            var item = list[i];
-            if (typeof item === 'object' && item !== null) {
-                if (item[uniqueKey] === undefined) {
-                    item[uniqueKey] = getUniqueKey();
-                }
-            }
+    function addHashFieldToListItem(item, trackBy) {
+        if (typeof item === 'object' && item !== null) {
+            item[trackBy] = getUniqueKey();
         }
-        return list;
+        return item;
     }
 
     /**
@@ -85,22 +82,17 @@
      *   6 -> deleted
      * Returns array of { item: T, state: int }.
      * Where state means: 0 - not modified, 1 - created, -1 - deleted.
-     * @param {*[]} list
-     * @param {*[]} prev
-     * @param {string} [hashField]
+     * @param {Array} list
+     * @param {Array} prev
+     * @param {string} [trackBy]
      */
-    function diff(list, prev, hashField) {
+    function diff(list, prev, trackBy) {
         var diff = [];
         var iList = 0;
         var iPrev = 0;
 
-        if (!hashField) {
-            hashListItems(list, HASH_FIELD_NAME);
-            hashListItems(prev, HASH_FIELD_NAME);
-        }
-
-        var listIndexMap = buildIndexMap(list, hashField);
-        var prevIndexMap = buildIndexMap(prev, hashField);
+        var listIndexMap = buildHashToIndexMap(list, trackBy);
+        var prevIndexMap = buildHashToIndexMap(prev, trackBy);
 
         for (; iList < list.length || iPrev < prev.length;) {
             var listItem = list[iList];
@@ -121,9 +113,13 @@
                 var prevItemIndex;
                 var listItemIndex;
 
-                if (hashField) {
-                    prevItemIndex = maybe(prevIndexMap[listItem[hashField]], -1);
-                    listItemIndex = maybe(listIndexMap[prevItem[hashField]], -1);
+                if (trackBy) {
+                    prevItemIndex = maybe(prevIndexMap[listItem[trackBy]], -1);
+                    listItemIndex = maybe(listIndexMap[prevItem[trackBy]], -1);
+                } else if (typeof listItem === 'object'
+                        && typeof prevItem === 'object') {
+                    prevItemIndex = maybe(prevIndexMap[TRACK_BY_FIELD], -1);
+                    listItemIndex = maybe(listIndexMap[TRACK_BY_FIELD], -1);
                 } else {
                     prevItemIndex = maybe(prevIndexMap[listItem], -1);
                     listItemIndex = maybe(listIndexMap[prevItem], -1);
@@ -132,22 +128,30 @@
                 var isCreated = prevItemIndex === -1;
                 var isDeleted = listItemIndex === -1;
 
+                // created
                 if (isCreated) {
                     diff.push({ item: listItem, state: DIFF_CREATED });
                     ++iList;
                 }
 
-                if (!isCreated && !isDeleted) { // moved
-                    diff.push({
-                        item: listItem,
-                        state: DIFF_MOVED,
-                        oldIndex: prevItemIndex,
-                        newIndex: iList
-                    });
+                // moved
+                if (!isCreated && !isDeleted) {
+                    if (iList === prevItemIndex) {
+                        // for reference types with given trackBy
+                        diff.push({ item: listItem, state: DIFF_NOT_MODIFIED });
+                    } else {
+                        diff.push({
+                            item: listItem,
+                            state: DIFF_MOVED,
+                            oldIndex: prevItemIndex,
+                            newIndex: iList
+                        });
+                    }
                     ++iList;
                     ++iPrev;
                 }
 
+                // deleted
                 if (isDeleted) {
                     diff.push({ item: prevItem, state: DIFF_DELETED });
                     ++iPrev;
@@ -165,13 +169,16 @@
 
     // exports ////////////////////////////////////////////////////////////////
 
+    diff.TRACK_BY_FIELD = TRACK_BY_FIELD;
     diff.NOT_MODIFIED = DIFF_NOT_MODIFIED;
     diff.CREATED = DIFF_CREATED;
     diff.MOVED = DIFF_MOVED;
     diff.DELETED = DIFF_DELETED;
     diff.getUniqueKey = getUniqueKey;
-    diff.hashListItems = hashListItems;
-    diff.buildIndexMap = buildIndexMap;
+    diff.addHashFieldToListItem = addHashFieldToListItem;
+    diff.buildHashToIndexMap = buildHashToIndexMap;
+
+    //Object.keys
 
     return diff;
 }));
