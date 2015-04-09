@@ -1,5 +1,6 @@
 require('chai').should();
 var diff = require('../index');
+
 describe('integration tests on big random arrays', function () {
     var n = 1e4;
     var list = [];

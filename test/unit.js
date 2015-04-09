@@ -98,4 +98,21 @@ describe('unit tests', function () {
             }).should.eq(false);
         });
     });
+
+    describe('getUniqueHash tests', function () {
+
+        it('should return unique values', function () {
+            var bulk = {};
+            var duplicate = false;
+            for (var i = 0; i < 100; ++i) {
+                var hash = diff.getUniqueKey();
+                if (hash in bulk) {
+                    duplicate = true;
+                    break;
+                }
+                bulk[hash] = 0;
+            }
+            duplicate.should.eq(false);
+        });
+    });
 });

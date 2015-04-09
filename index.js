@@ -175,10 +175,7 @@
     diff.MOVED = DIFF_MOVED;
     diff.DELETED = DIFF_DELETED;
     diff.getUniqueKey = getUniqueKey;
-    diff.addHashFieldToListItem = addHashFieldToListItem;
     diff.buildHashToIndexMap = buildHashToIndexMap;
-
-    //Object.keys
 
     return diff;
 }));
