@@ -49,9 +49,9 @@
         var map = {};
         for (var i = 0; i < list.length; ++i) {
             var item = list[i];
-            if (trackBy) { // reference types
+            if (trackBy) {
                 map[item[trackBy]] = i;
-            } else { // for value types
+            } else {
                 map[item] = i;
                 addHashFieldToListItem(item, TRACK_BY_FIELD);
             }
