@@ -138,7 +138,10 @@
                 if (!isCreated && !isDeleted) {
                     if (iList === prevItemIndex) {
                         // for reference types with given trackBy
-                        diff.push({ item: listItem, state: DIFF_NOT_MODIFIED });
+                        diff.push({
+                            item: listItem,
+                            state: DIFF_NOT_MODIFIED
+                        });
                     } else {
                         diff.push({
                             item: listItem,
