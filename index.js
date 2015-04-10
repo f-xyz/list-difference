@@ -22,7 +22,7 @@
     var lastUniqueId = 0;
 
     /**
-     * Returns auto incremental unique ID as integer.
+     * Returns auto incremental unique ID as an integer.
      * @returns {number}
      */
     function getUniqueKey() {
@@ -91,8 +91,13 @@
         var iList = 0;
         var iPrev = 0;
 
-        var listIndexMap = buildHashToIndexMap(list, trackBy);
-        var prevIndexMap = buildHashToIndexMap(prev, trackBy);
+        if (!hashField) {
+            hashListItems(list, DEFAULT_HASH_FIELD);
+            hashListItems(prev, DEFAULT_HASH_FIELD);
+        }
+
+        var listIndexMap = buildIndexMap(list, hashField);
+        var prevIndexMap = buildIndexMap(prev, hashField);
 
         for (; iList < list.length || iPrev < prev.length;) {
             var listItem = list[iList];
