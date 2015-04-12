@@ -8,16 +8,16 @@ describe('unit tests', function () {
         it('both arrays are empty', function () {
             diff([], []).should.eql([]);
         });
-
+        
         it('created element', function () {
             diff([1], []).should.eql([
-                { item: 1, state: diff.CREATED }
+                { item: 1, state: diff.CREATED, iList: 0, iPrev: -1 }
             ]);
         });
 
         it('deleted element', function () {
             diff([], [1]).should.eql([
-                { item: 1, state: diff.DELETED }
+                { item: 1, state: diff.DELETED, iList: -1, iPrev: 0 }
             ]);
         });
     });
@@ -26,35 +26,35 @@ describe('unit tests', function () {
 
         it('not modified elements', function () {
             diff([1], [1]).should.eql([
-                { item: 1, state: diff.NOT_MODIFIED }
+                { item: 1, state: diff.NOT_MODIFIED, iList: 0, iPrev: 0 }
             ]);
         });
 
         it('replaced elements', function () {
             diff([2], [1]).should.eql([
-                { item: 2, state: diff.CREATED },
-                { item: 1, state: diff.DELETED }
+                { item: 2, state: diff.CREATED, iList: 0, iPrev: -1 },
+                { item: 1, state: diff.DELETED, iList: -1, iPrev: 0 }
             ]);
         });
 
         it('created element with non-zero index', function () {
             diff([1, 2], [2]).should.eql([
-                { item: 1, state: diff.CREATED },
-                { item: 2, state: diff.NOT_MODIFIED }
+                { item: 1, state: diff.CREATED, iList: 0, iPrev: -1 },
+                { item: 2, state: diff.NOT_MODIFIED, iList: 1, iPrev: 0 }
             ]);
         });
 
         it('deleted element with non-zero index', function () {
-            diff([1, 2], [1]).should.eql([
-                { item: 1, state: diff.NOT_MODIFIED },
-                { item: 2, state: diff.CREATED }
+            diff([1], [1, 2]).should.eql([
+                { item: 1, state: diff.NOT_MODIFIED, iList: 0, iPrev: 0 },
+                { item: 2, state: diff.DELETED, iList: -1, iPrev: 1 }
             ]);
         });
 
         it('exchange', function () {
             diff([1, 2], [2, 1]).should.eql([
-                { item: 1, state: diff.MOVED, oldIndex: 1, newIndex: 0 },
-                { item: 2, state: diff.MOVED, oldIndex: 0, newIndex: 1 }
+                { item: 1, state: diff.MOVED, iList: 0, iPrev: 1 },
+                { item: 2, state: diff.MOVED, iList: 1, iPrev: 0 }
             ]);
         });
 
@@ -62,8 +62,8 @@ describe('unit tests', function () {
             var list = [null];
             var prev = [undefined];
             diff(list, prev).should.eql([
-                { item: null, state: diff.CREATED },
-                { item: undefined, state: diff.DELETED }
+                { item: null, state: diff.CREATED, iList: 0, iPrev: -1 },
+                { item: undefined, state: diff.DELETED, iList: -1, iPrev: 0 }
             ]);
         });
     });
@@ -75,8 +75,8 @@ describe('unit tests', function () {
             var b = { a: 1, id: 2 };
             var result = diff([a], [b]);
             result.should.eql([
-                { item: a, state: diff.CREATED },
-                { item: b, state: diff.DELETED }
+                { item: a, state: diff.CREATED, iList: 0, iPrev: -1 },
+                { item: b, state: diff.DELETED, iList: -1, iPrev: 0 }
             ]);
         });
 

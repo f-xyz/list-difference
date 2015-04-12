@@ -22,7 +22,7 @@
     var lastUniqueId = 0;
 
     /**
-     * Returns auto incremental unique ID as an integer.
+     * Returns auto incremental unique ID as integer.
      * @returns {number}
      */
     function getUniqueKey() {
@@ -91,13 +91,17 @@
         var iList = 0;
         var iPrev = 0;
 
-        if (!hashField) {
-            hashListItems(list, DEFAULT_HASH_FIELD);
-            hashListItems(prev, DEFAULT_HASH_FIELD);
-        }
+        var listIndexMap = buildHashToIndexMap(list, trackBy);
+        var prevIndexMap = buildHashToIndexMap(prev, trackBy);
 
-        var listIndexMap = buildIndexMap(list, hashField);
-        var prevIndexMap = buildIndexMap(prev, hashField);
+        function addEntry(item, state, iList, iPrev) {
+            diff.push({
+                item: item,
+                state: state,
+                iList: iList,
+                iPrev: iPrev
+            });
+        }
 
         for (; iList < list.length || iPrev < prev.length;) {
             var listItem = list[iList];
@@ -105,12 +109,12 @@
 
             if (iList >= list.length) {
 
-                diff.push({ item: prevItem, state: DIFF_DELETED });
+                addEntry(prevItem, DIFF_DELETED, -1, iPrev);
                 ++iPrev;
 
             } else if (iPrev >= prev.length) {
 
-                diff.push({ item: listItem, state: DIFF_CREATED });
+                addEntry(listItem, DIFF_CREATED, iList, -1);
                 ++iList;
 
             } else if (listItem !== prevItem) {
@@ -135,7 +139,7 @@
 
                 // created
                 if (isCreated) {
-                    diff.push({ item: listItem, state: DIFF_CREATED });
+                    addEntry(listItem, DIFF_CREATED, iList, -1);
                     ++iList;
                 }
 
@@ -143,17 +147,9 @@
                 if (!isCreated && !isDeleted) {
                     if (iList === prevItemIndex) {
                         // for reference types with given trackBy
-                        diff.push({
-                            item: listItem,
-                            state: DIFF_NOT_MODIFIED
-                        });
+                        addEntry(listItem, DIFF_NOT_MODIFIED);
                     } else {
-                        diff.push({
-                            item: listItem,
-                            state: DIFF_MOVED,
-                            oldIndex: prevItemIndex,
-                            newIndex: iList
-                        });
+                        addEntry(listItem, DIFF_MOVED, iList, prevItemIndex);
                     }
                     ++iList;
                     ++iPrev;
@@ -161,12 +157,12 @@
 
                 // deleted
                 if (isDeleted) {
-                    diff.push({ item: prevItem, state: DIFF_DELETED });
+                    addEntry(prevItem, DIFF_DELETED, -1, iPrev);
                     ++iPrev;
                 }
 
             } else {
-                diff.push({ item: listItem, state: DIFF_NOT_MODIFIED });
+                addEntry(prevItem, DIFF_NOT_MODIFIED, iList, iPrev);
                 ++iList;
                 ++iPrev;
             }
