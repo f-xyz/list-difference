@@ -51,13 +51,6 @@ describe('unit tests', function () {
             ]);
         });
 
-        it('exchange', function () {
-            diff([1, 2], [2, 1]).should.eql([
-                { item: 1, state: diff.MOVED, iList: 0, iPrev: 1 },
-                { item: 2, state: diff.MOVED, iList: 1, iPrev: 0 }
-            ]);
-        });
-
         it('should deal with null and undefined', function () {
             var list = [null];
             var prev = [undefined];
@@ -96,6 +89,32 @@ describe('unit tests', function () {
             result.every(function (x) {
                 return diff.TRACK_BY_FIELD in x.item;
             }).should.eq(false);
+        });
+    });
+
+    describe('swap', function () {
+
+        it('swap 2 items', function () {
+            diff([1, 2], [2, 1]).should.eql([
+                { item: 2, state: diff.MOVED, iList: 1, iPrev: 0 },
+                { item: 1, state: diff.MOVED, iList: 0, iPrev: 1 }
+            ]);
+        });
+
+        it('swap 3 items', function () {
+            diff([1, 0, 2], [0, 1, 2]).should.eql([
+                { item: 0, state: diff.MOVED, iList: 1, iPrev: 0 },
+                { item: 1, state: diff.MOVED, iList: 0, iPrev: 1 },
+                { item: 2, state: diff.NOT_MODIFIED, iList: 2, iPrev: 2 }
+            ]);
+        });
+
+        it('swap 3 items around center', function () {
+            diff([2, 1, 0], [0, 1, 2]).should.eql([
+                { item: 0, state: diff.MOVED, iList: 2, iPrev: 0 },
+                { item: 1, state: diff.NOT_MODIFIED, iList: 1, iPrev: 1 },
+                { item: 2, state: diff.MOVED, iList: 0, iPrev: 2 }
+            ]);
         });
     });
 

@@ -11,6 +11,10 @@
         root[factory.name] = factory();
     }
 }(this, function diff() {
+    'use strict';
+
+    // todo: make output objects' keys readable
+    // todo: remove support of value items -> simplify + performance
 
     var TRACK_BY_FIELD = '$$listDiffHash';
 
@@ -88,8 +92,8 @@
      */
     function diff(list, prev, trackBy) {
         var diff = [];
-        var iList = 0;
-        var iPrev = 0;
+        var indexList = 0;
+        var indexPrev = 0;
 
         var listIndexMap = buildHashToIndexMap(list, trackBy);
         var prevIndexMap = buildHashToIndexMap(prev, trackBy);
@@ -103,68 +107,68 @@
             });
         }
 
-        for (; iList < list.length || iPrev < prev.length;) {
-            var listItem = list[iList];
-            var prevItem = prev[iPrev];
+        for (; indexList < list.length || indexPrev < prev.length;) {
+            var itemList = list[indexList];
+            var itemPrev = prev[indexPrev];
 
-            if (iList >= list.length) {
+            if (indexList >= list.length) {
 
-                addEntry(prevItem, DIFF_DELETED, -1, iPrev);
-                ++iPrev;
+                addEntry(itemPrev, DIFF_DELETED, -1, indexPrev);
+                ++indexPrev;
 
-            } else if (iPrev >= prev.length) {
+            } else if (indexPrev >= prev.length) {
 
-                addEntry(listItem, DIFF_CREATED, iList, -1);
-                ++iList;
+                addEntry(itemList, DIFF_CREATED, indexList, -1);
+                ++indexList;
 
-            } else if (listItem !== prevItem) {
+            } else if (itemList !== itemPrev) {
 
-                var prevItemIndex;
-                var listItemIndex;
+                var indexOfItemInPrevList;
+                var indexOfPrevItemInList;
 
                 if (trackBy) {
-                    prevItemIndex = maybe(prevIndexMap[listItem[trackBy]], -1);
-                    listItemIndex = maybe(listIndexMap[prevItem[trackBy]], -1);
-                } else if (typeof listItem === 'object'
-                        && typeof prevItem === 'object') {
-                    prevItemIndex = maybe(prevIndexMap[TRACK_BY_FIELD], -1);
-                    listItemIndex = maybe(listIndexMap[TRACK_BY_FIELD], -1);
+                    indexOfItemInPrevList = maybe(prevIndexMap[itemList[trackBy]], -1);
+                    indexOfPrevItemInList = maybe(listIndexMap[itemPrev[trackBy]], -1);
+                } else if (typeof itemList === 'object'
+                        && typeof itemPrev === 'object') {
+                    indexOfItemInPrevList = maybe(prevIndexMap[TRACK_BY_FIELD], -1);
+                    indexOfPrevItemInList = maybe(listIndexMap[TRACK_BY_FIELD], -1);
                 } else {
-                    prevItemIndex = maybe(prevIndexMap[listItem], -1);
-                    listItemIndex = maybe(listIndexMap[prevItem], -1);
+                    indexOfItemInPrevList = maybe(prevIndexMap[itemList], -1);
+                    indexOfPrevItemInList = maybe(listIndexMap[itemPrev], -1);
                 }
 
-                var isCreated = prevItemIndex === -1;
-                var isDeleted = listItemIndex === -1;
+                var isCreated = indexOfItemInPrevList === -1;
+                var isDeleted = indexOfPrevItemInList === -1;
 
                 // created
                 if (isCreated) {
-                    addEntry(listItem, DIFF_CREATED, iList, -1);
-                    ++iList;
+                    addEntry(itemList, DIFF_CREATED, indexList, -1);
+                    ++indexList;
                 }
 
                 // moved
                 if (!isCreated && !isDeleted) {
-                    if (iList === prevItemIndex) {
+                    if (indexList === indexOfItemInPrevList) {
                         // for reference types with given trackBy
-                        addEntry(listItem, DIFF_NOT_MODIFIED);
+                        addEntry(itemPrev, DIFF_NOT_MODIFIED);
                     } else {
-                        addEntry(listItem, DIFF_MOVED, iList, prevItemIndex);
+                        addEntry(itemPrev, DIFF_MOVED, indexOfItemInPrevList, indexPrev);
                     }
-                    ++iList;
-                    ++iPrev;
+                    ++indexList;
+                    ++indexPrev;
                 }
 
                 // deleted
                 if (isDeleted) {
-                    addEntry(prevItem, DIFF_DELETED, -1, iPrev);
-                    ++iPrev;
+                    addEntry(itemPrev, DIFF_DELETED, -1, indexPrev);
+                    ++indexPrev;
                 }
 
             } else {
-                addEntry(prevItem, DIFF_NOT_MODIFIED, iList, iPrev);
-                ++iList;
-                ++iPrev;
+                addEntry(itemPrev, DIFF_NOT_MODIFIED, indexList, indexPrev);
+                ++indexList;
+                ++indexPrev;
             }
         }
 
