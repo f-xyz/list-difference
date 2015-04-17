@@ -1,9 +1,13 @@
+*OUTDATED*
+
 Calculates difference between two arrays.
-If elements are objects it compares them by reference.
+If elements are objects it compares them by reference or using provided field (trackBy parameter).
 
 Let's consider two lists:
 
 A `[1, 2, 3, 5, 6]` and B `[2, 1, 3, 4, 5]`
+
+Returned value will be:
 
 |A Item | B Item | State             |
 |-------|--------|-------------------|
@@ -14,7 +18,7 @@ A `[1, 2, 3, 5, 6]` and B `[2, 1, 3, 4, 5]`
 | 5     | 5      | not modified      |
 | 6     |        | created           |
 
-`diff` will return an array of { item: T, state: number }.
+`diff` will return an array of { item: T, state: number, indexOld: number, indexNew: number }.
 Where state means:
   * 0 - not modified
   * 1 - created
