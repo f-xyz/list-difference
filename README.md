@@ -1,4 +1,5 @@
 *OUTDATED*
+
 TODO: rewrite README
 
 Calculates difference between two arrays.
