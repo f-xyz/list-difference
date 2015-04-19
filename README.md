@@ -2,7 +2,6 @@
 
 TODO: rewrite README
 
-
 Calculates difference between two arrays.
 If elements are objects it compares them by reference or using provided field (trackBy parameter).
 
