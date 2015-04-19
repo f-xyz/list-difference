@@ -14,7 +14,7 @@
     'use strict';
 
     // todo: make output objects' keys readable
-    // todo: remove support of value items -> simplify + performance
+    // todo: remove support of value items -> simplify + performance (?)
 
     var TRACK_BY_FIELD = '$$listDiffHash';
 
