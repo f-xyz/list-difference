@@ -1,9 +1,6 @@
 (function (root, factory) {
     /* istanbul ignore next */
-    if (typeof root.define === 'function' && root.define.amd) {
-        // AMD. Register as an anonymous module.
-        root.define(['exports'], factory);
-    } else if (typeof module === 'object') {
+    if (typeof module === 'object') {
         // CommonJS
         module.exports = factory();
     } else {
@@ -12,11 +9,6 @@
     }
 }(this, function diff() {
     'use strict';
-
-    // todo: remove support of value items (?) -> simplify code
-    // todo: remove trackBy default value (?)
-
-    var TRACK_BY_FIELD = '$$listDiffHash';
 
     var DIFF_NOT_MODIFIED = 0;
     var DIFF_CREATED = 1;
@@ -27,9 +19,9 @@
 
     /**
      * Returns auto incremental unique ID as integer.
-     * @returns {number}
+     * @returns {number} integers starting from 0
      */
-    function getUniqueKey() {
+    function getUniqueId() {
         return lastUniqueId++;
     }
 
@@ -53,26 +45,9 @@
         var map = {};
         for (var i = 0; i < list.length; ++i) {
             var item = list[i];
-            if (primaryKey) {
-                map[item[primaryKey]] = i;
-            } else {
-                map[item] = i;
-                addHashFieldToListItem(item, TRACK_BY_FIELD);
-            }
+            map[item[primaryKey]] = i;
         }
         return map;
-    }
-
-    /**
-     * @param item
-     * @param {string} primaryKey
-     * @returns {*} item
-     */
-    function addHashFieldToListItem(item, primaryKey) {
-        if (typeof item === 'object' && item !== null) {
-            item[primaryKey] = getUniqueKey();
-        }
-        return item;
     }
 
     /**
@@ -81,7 +56,7 @@
      * Where state means: 0 - not modified, 1 - created, -1 - deleted.
      * @param {Array} newList
      * @param {Array} oldList
-     * @param {string} [primaryKey] item's unique index field
+     * @param {string} primaryKey item's unique index field name
      */
     function diff(newList, oldList, primaryKey) {
         var diff = [];
@@ -116,19 +91,11 @@
 
             } else if (newItem !== oldItem) {
 
-                var indexOfNewItemInOldList;
-                var indexOfOldItemInNewList;
+                var indexOfNewItemInOldList =
+                    maybe(oldIndexMap[newItem[primaryKey]], -1);
 
-                if (primaryKey) {
-                    indexOfNewItemInOldList = maybe(oldIndexMap[newItem[primaryKey]], -1);
-                    indexOfOldItemInNewList = maybe(newIndexMap[oldItem[primaryKey]], -1);
-                } else if (typeof newItem === 'object' && typeof oldItem === 'object') {
-                    indexOfNewItemInOldList = maybe(oldIndexMap[TRACK_BY_FIELD], -1);
-                    indexOfOldItemInNewList = maybe(newIndexMap[TRACK_BY_FIELD], -1);
-                } else {
-                    indexOfNewItemInOldList = maybe(oldIndexMap[newItem], -1);
-                    indexOfOldItemInNewList = maybe(newIndexMap[oldItem], -1);
-                }
+                var indexOfOldItemInNewList =
+                    maybe(newIndexMap[oldItem[primaryKey]], -1);
 
                 var isCreated = indexOfNewItemInOldList === -1;
                 var isDeleted = indexOfOldItemInNewList === -1;
@@ -141,12 +108,7 @@
 
                 // moved
                 if (!isCreated && !isDeleted) {
-                    if (newIndex === indexOfNewItemInOldList) {
-                        // for reference types with given trackBy
-                        addEntry(oldItem, DIFF_NOT_MODIFIED);
-                    } else {
-                        addEntry(newItem, DIFF_MOVED, newIndex, indexOfOldItemInNewList);
-                    }
+                    addEntry(newItem, DIFF_MOVED, newIndex, indexOfOldItemInNewList);
                     ++newIndex;
                     ++oldIndex;
                 }
@@ -169,12 +131,11 @@
 
     // exports ////////////////////////////////////////////////////////////////
 
-    diff.TRACK_BY_FIELD = TRACK_BY_FIELD;
     diff.NOT_MODIFIED = DIFF_NOT_MODIFIED;
     diff.CREATED = DIFF_CREATED;
     diff.MOVED = DIFF_MOVED;
     diff.DELETED = DIFF_DELETED;
-    diff.getUniqueKey = getUniqueKey;
+    diff.getUniqueId = getUniqueId;
     diff.buildHashToIndexMap = buildHashToIndexMap;
 
     return diff;
