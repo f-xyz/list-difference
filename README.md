@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/fantasticMrFox/list-diff.svg?branch=master)](https://travis-ci.org/fantasticMrFox/list-diff)
 
-## Signature
+# Calculates difference between two arrays.
+
 ```javascript
 /**
  * Calculates difference between two arrays.
