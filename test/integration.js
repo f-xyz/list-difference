@@ -9,10 +9,10 @@ describe('integration tests on big random arrays', function () {
     var deleted = [];
     var notModified = [];
 
-    for (var i = 0; i < n; ++i) {
+    for (var i = 0; list.length < n || prev.length < n; ++i) {
 
-        var addToList = Math.random() >= 0.5;
-        var addToPrev = Math.random() >= 0.5;
+        var addToList = Math.random() >= 0.5 && list.length < n;
+        var addToPrev = Math.random() >= 0.5 && prev.length < n;
 
         var x = { x: i };
         if (addToList) list.push(x);

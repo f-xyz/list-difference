@@ -8,16 +8,16 @@ describe('unit tests', function () {
         it('both arrays are empty', function () {
             diff([], []).should.eql([]);
         });
-        
+
         it('created element', function () {
             diff([1], []).should.eql([
-                { item: 1, state: diff.CREATED, iList: 0, iPrev: -1 }
+                { item: 1, state: diff.CREATED, oldIndex: -1, newIndex: 0 }
             ]);
         });
 
         it('deleted element', function () {
             diff([], [1]).should.eql([
-                { item: 1, state: diff.DELETED, iList: -1, iPrev: 0 }
+                { item: 1, state: diff.DELETED, oldIndex: 0, newIndex: -1 }
             ]);
         });
     });
@@ -26,28 +26,28 @@ describe('unit tests', function () {
 
         it('not modified elements', function () {
             diff([1], [1]).should.eql([
-                { item: 1, state: diff.NOT_MODIFIED, iList: 0, iPrev: 0 }
+                { item: 1, state: diff.NOT_MODIFIED, oldIndex: 0, newIndex: 0 }
             ]);
         });
 
         it('replaced elements', function () {
             diff([2], [1]).should.eql([
-                { item: 2, state: diff.CREATED, iList: 0, iPrev: -1 },
-                { item: 1, state: diff.DELETED, iList: -1, iPrev: 0 }
+                { item: 2, state: diff.CREATED, oldIndex: -1, newIndex: 0 },
+                { item: 1, state: diff.DELETED, oldIndex: 0, newIndex: -1 }
             ]);
         });
 
         it('created element with non-zero index', function () {
             diff([1, 2], [2]).should.eql([
-                { item: 1, state: diff.CREATED, iList: 0, iPrev: -1 },
-                { item: 2, state: diff.NOT_MODIFIED, iList: 1, iPrev: 0 }
+                { item: 1, state: diff.CREATED, oldIndex: -1, newIndex: 0 },
+                { item: 2, state: diff.NOT_MODIFIED, oldIndex: 0, newIndex: 1 }
             ]);
         });
 
         it('deleted element with non-zero index', function () {
             diff([1], [1, 2]).should.eql([
-                { item: 1, state: diff.NOT_MODIFIED, iList: 0, iPrev: 0 },
-                { item: 2, state: diff.DELETED, iList: -1, iPrev: 1 }
+                { item: 1, state: diff.NOT_MODIFIED, oldIndex: 0, newIndex: 0 },
+                { item: 2, state: diff.DELETED, oldIndex: 1, newIndex: -1 }
             ]);
         });
 
@@ -55,8 +55,8 @@ describe('unit tests', function () {
             var list = [null];
             var prev = [undefined];
             diff(list, prev).should.eql([
-                { item: null, state: diff.CREATED, iList: 0, iPrev: -1 },
-                { item: undefined, state: diff.DELETED, iList: -1, iPrev: 0 }
+                { item: null, state: diff.CREATED, oldIndex: -1, newIndex: 0 },
+                { item: undefined, state: diff.DELETED, oldIndex: 0, newIndex: -1 }
             ]);
         });
     });
@@ -68,8 +68,8 @@ describe('unit tests', function () {
             var b = { a: 1, id: 2 };
             var result = diff([a], [b]);
             result.should.eql([
-                { item: a, state: diff.CREATED, iList: 0, iPrev: -1 },
-                { item: b, state: diff.DELETED, iList: -1, iPrev: 0 }
+                { item: a, state: diff.CREATED, oldIndex: -1, newIndex: 0 },
+                { item: b, state: diff.DELETED, oldIndex: 0, newIndex: -1 }
             ]);
         });
 
@@ -96,24 +96,24 @@ describe('unit tests', function () {
 
         it('swap 2 items', function () {
             diff([1, 2], [2, 1]).should.eql([
-                { item: 2, state: diff.MOVED, iList: 1, iPrev: 0 },
-                { item: 1, state: diff.MOVED, iList: 0, iPrev: 1 }
+                { item: 1, state: diff.MOVED, oldIndex: 1, newIndex: 0 },
+                { item: 2, state: diff.MOVED, oldIndex: 0, newIndex: 1 }
             ]);
         });
 
         it('swap 3 items', function () {
             diff([1, 0, 2], [0, 1, 2]).should.eql([
-                { item: 0, state: diff.MOVED, iList: 1, iPrev: 0 },
-                { item: 1, state: diff.MOVED, iList: 0, iPrev: 1 },
-                { item: 2, state: diff.NOT_MODIFIED, iList: 2, iPrev: 2 }
+                { item: 1, state: diff.MOVED, oldIndex: 1, newIndex: 0 },
+                { item: 0, state: diff.MOVED, oldIndex: 0, newIndex: 1 },
+                { item: 2, state: diff.NOT_MODIFIED, oldIndex: 2, newIndex: 2 }
             ]);
         });
 
         it('swap 3 items around center', function () {
             diff([2, 1, 0], [0, 1, 2]).should.eql([
-                { item: 0, state: diff.MOVED, iList: 2, iPrev: 0 },
-                { item: 1, state: diff.NOT_MODIFIED, iList: 1, iPrev: 1 },
-                { item: 2, state: diff.MOVED, iList: 0, iPrev: 2 }
+                { item: 2, state: diff.MOVED, oldIndex: 2, newIndex: 0 },
+                { item: 1, state: diff.NOT_MODIFIED, oldIndex: 1, newIndex: 1 },
+                { item: 0, state: diff.MOVED, oldIndex: 0, newIndex: 2 }
             ]);
         });
     });

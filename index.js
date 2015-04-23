@@ -13,8 +13,8 @@
 }(this, function diff() {
     'use strict';
 
-    // todo: make output objects' keys readable
-    // todo: remove support of value items -> simplify + performance (?)
+    // todo: remove support of value items (?) -> simplify code
+    // todo: remove trackBy default value (?)
 
     var TRACK_BY_FIELD = '$$listDiffHash';
 
@@ -46,15 +46,15 @@
 
     /**
      * @param {Array} list
-     * @param {string} trackBy
+     * @param {string} primaryKey
      * @returns {{}}
      */
-    function buildHashToIndexMap(list, trackBy) {
+    function buildHashToIndexMap(list, primaryKey) {
         var map = {};
         for (var i = 0; i < list.length; ++i) {
             var item = list[i];
-            if (trackBy) {
-                map[item[trackBy]] = i;
+            if (primaryKey) {
+                map[item[primaryKey]] = i;
             } else {
                 map[item] = i;
                 addHashFieldToListItem(item, TRACK_BY_FIELD);
@@ -65,110 +65,102 @@
 
     /**
      * @param item
-     * @param {string} trackBy
+     * @param {string} primaryKey
      * @returns {*} item
      */
-    function addHashFieldToListItem(item, trackBy) {
+    function addHashFieldToListItem(item, primaryKey) {
         if (typeof item === 'object' && item !== null) {
-            item[trackBy] = getUniqueKey();
+            item[primaryKey] = getUniqueKey();
         }
         return item;
     }
 
     /**
      * Calculates difference between two arrays.
-     * List and prev. list:
-     * 1 1 -> not changed
-     * 2 2 -> not changed
-     *   3 -> deleted
-     * 4   -> created
-     * 5   -> created
-     *   6 -> deleted
      * Returns array of { item: T, state: int }.
      * Where state means: 0 - not modified, 1 - created, -1 - deleted.
-     * @param {Array} list
-     * @param {Array} prev
-     * @param {string} [trackBy]
+     * @param {Array} newList
+     * @param {Array} oldList
+     * @param {string} [primaryKey] item's unique index field
      */
-    function diff(list, prev, trackBy) {
+    function diff(newList, oldList, primaryKey) {
         var diff = [];
-        var indexList = 0;
-        var indexPrev = 0;
+        var newIndex = 0;
+        var oldIndex = 0;
 
-        var listIndexMap = buildHashToIndexMap(list, trackBy);
-        var prevIndexMap = buildHashToIndexMap(prev, trackBy);
+        var newIndexMap = buildHashToIndexMap(newList, primaryKey);
+        var oldIndexMap = buildHashToIndexMap(oldList, primaryKey);
 
-        function addEntry(item, state, iList, iPrev) {
+        function addEntry(item, state, newIndex, prevIndex) {
             diff.push({
                 item: item,
                 state: state,
-                iList: iList,
-                iPrev: iPrev
+                oldIndex: prevIndex,
+                newIndex: newIndex
             });
         }
 
-        for (; indexList < list.length || indexPrev < prev.length;) {
-            var itemList = list[indexList];
-            var itemPrev = prev[indexPrev];
+        for (; newIndex < newList.length || oldIndex < oldList.length;) {
+            var newItem = newList[newIndex];
+            var oldItem = oldList[oldIndex];
 
-            if (indexList >= list.length) {
+            if (newIndex >= newList.length) {
 
-                addEntry(itemPrev, DIFF_DELETED, -1, indexPrev);
-                ++indexPrev;
+                addEntry(oldItem, DIFF_DELETED, -1, oldIndex);
+                ++oldIndex;
 
-            } else if (indexPrev >= prev.length) {
+            } else if (oldIndex >= oldList.length) {
 
-                addEntry(itemList, DIFF_CREATED, indexList, -1);
-                ++indexList;
+                addEntry(newItem, DIFF_CREATED, newIndex, -1);
+                ++newIndex;
 
-            } else if (itemList !== itemPrev) {
+            } else if (newItem !== oldItem) {
 
-                var indexOfItemInPrevList;
-                var indexOfPrevItemInList;
+                var indexOfNewItemInOldList;
+                var indexOfOldItemInNewList;
 
-                if (trackBy) {
-                    indexOfItemInPrevList = maybe(prevIndexMap[itemList[trackBy]], -1);
-                    indexOfPrevItemInList = maybe(listIndexMap[itemPrev[trackBy]], -1);
-                } else if (typeof itemList === 'object'
-                        && typeof itemPrev === 'object') {
-                    indexOfItemInPrevList = maybe(prevIndexMap[TRACK_BY_FIELD], -1);
-                    indexOfPrevItemInList = maybe(listIndexMap[TRACK_BY_FIELD], -1);
+                if (primaryKey) {
+                    indexOfNewItemInOldList = maybe(oldIndexMap[newItem[primaryKey]], -1);
+                    indexOfOldItemInNewList = maybe(newIndexMap[oldItem[primaryKey]], -1);
+                } else if (typeof newItem === 'object' && typeof oldItem === 'object') {
+                    indexOfNewItemInOldList = maybe(oldIndexMap[TRACK_BY_FIELD], -1);
+                    indexOfOldItemInNewList = maybe(newIndexMap[TRACK_BY_FIELD], -1);
                 } else {
-                    indexOfItemInPrevList = maybe(prevIndexMap[itemList], -1);
-                    indexOfPrevItemInList = maybe(listIndexMap[itemPrev], -1);
+                    indexOfNewItemInOldList = maybe(oldIndexMap[newItem], -1);
+                    indexOfOldItemInNewList = maybe(newIndexMap[oldItem], -1);
                 }
 
-                var isCreated = indexOfItemInPrevList === -1;
-                var isDeleted = indexOfPrevItemInList === -1;
+                var isCreated = indexOfNewItemInOldList === -1;
+                var isDeleted = indexOfOldItemInNewList === -1;
 
                 // created
                 if (isCreated) {
-                    addEntry(itemList, DIFF_CREATED, indexList, -1);
-                    ++indexList;
+                    addEntry(newItem, DIFF_CREATED, newIndex, -1);
+                    ++newIndex;
                 }
 
                 // moved
                 if (!isCreated && !isDeleted) {
-                    if (indexList === indexOfItemInPrevList) {
+                    if (newIndex === indexOfNewItemInOldList) {
                         // for reference types with given trackBy
-                        addEntry(itemPrev, DIFF_NOT_MODIFIED);
+                        addEntry(oldItem, DIFF_NOT_MODIFIED);
                     } else {
-                        addEntry(itemPrev, DIFF_MOVED, indexOfItemInPrevList, indexPrev);
+                        addEntry(newItem, DIFF_MOVED, newIndex, indexOfOldItemInNewList);
                     }
-                    ++indexList;
-                    ++indexPrev;
+                    ++newIndex;
+                    ++oldIndex;
                 }
 
                 // deleted
                 if (isDeleted) {
-                    addEntry(itemPrev, DIFF_DELETED, -1, indexPrev);
-                    ++indexPrev;
+                    addEntry(oldItem, DIFF_DELETED, -1, oldIndex);
+                    ++oldIndex;
                 }
 
             } else {
-                addEntry(itemPrev, DIFF_NOT_MODIFIED, indexList, indexPrev);
-                ++indexList;
-                ++indexPrev;
+                addEntry(oldItem, DIFF_NOT_MODIFIED, newIndex, oldIndex);
+                ++newIndex;
+                ++oldIndex;
             }
         }
 
