@@ -1,6 +1,8 @@
 [![Build Status](https://travis-ci.org/fantasticMrFox/list-diff.svg?branch=master)](https://travis-ci.org/fantasticMrFox/list-diff)
 
-# Calculates difference between two arrays.
+# list-diff
+
+Calculates difference between two arrays.
 
 ```javascript
 /**
@@ -21,28 +23,28 @@ var b = { x: 2 };
 var c = { x: 3 };
 
 // created
-diff([a], [], PK).should.eql([
+diff([a], [], 'x').should.eql([
     { item: a, state: diff.CREATED, oldIndex: -1, newIndex: 0 }
 ]);
 
 // deleted
-diff([], [a], PK).should.eql([
+diff([], [a], 'x').should.eql([
     { item: a, state: diff.DELETED, oldIndex: 0, newIndex: -1 }
 ]);
 
 // not modified
-diff([a], [a], PK).should.eql([
+diff([a], [a], 'x').should.eql([
     { item: a, state: diff.NOT_MODIFIED, oldIndex: 0, newIndex: 0 }
 ]);
 
 // replaced
-diff([b], [a], PK).should.eql([
+diff([b], [a], 'x').should.eql([
     { item: b, state: diff.CREATED, oldIndex: -1, newIndex: 0 },
     { item: a, state: diff.DELETED, oldIndex: 0, newIndex: -1 }
 ]);
 
 // moved
-diff([c, b, a], [a, b, c], PK).should.eql([
+diff([c, b, a], [a, b, c], 'x').should.eql([
     { item: c, state: diff.MOVED, oldIndex: 2, newIndex: 0 },
     { item: b, state: diff.NOT_MODIFIED, oldIndex: 1, newIndex: 1 },
     { item: a, state: diff.MOVED, oldIndex: 0, newIndex: 2 }
