@@ -16,7 +16,7 @@ Calculates difference between two arrays.
 function diff(newList, oldList, primaryKey);
 ```
 
-## Usages
+## How to use
 ```javascript
 var a = { x: 1 };
 var b = { x: 2 };

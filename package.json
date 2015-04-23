@@ -1,7 +1,7 @@
 {
   "name": "list-diff",
-  "version": "1.0.0",
-  "description": "Calculates a difference between two lists.",
+  "version": "2.0",
+  "description": "Calculates difference between two arrays.",
   "main": "index.js",
   "directories": {
     "test": "test"
