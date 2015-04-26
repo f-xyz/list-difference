@@ -1,6 +1,6 @@
 {
   "name": "list-diff",
-  "version": "2.0.1",
+  "version": "0.1.13",
   "description": "Calculates difference between two arrays.",
   "main": "index.js",
   "directories": {
