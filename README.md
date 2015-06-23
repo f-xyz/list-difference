@@ -1,6 +1,6 @@
-# list-diff v.0.1.13
+# list-difference
 
-[![Build Status](https://travis-ci.org/fantasticMrFox/list-diff.svg?branch=master)](https://travis-ci.org/fantasticMrFox/list-diff)
+[![Build Status](https://travis-ci.org/fantasticMrFox/list-difference.svg?branch=master)](https://travis-ci.org/fantasticMrFox/list-difference)
 
 Calculates difference between two arrays.
 
@@ -52,7 +52,7 @@ diff([c, b, a], [a, b, c], 'x').should.eql([
 
 ```
 
-## States available
+## Available states
 
 | State             | Value |
 |-------------------|-------|
