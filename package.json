@@ -1,6 +1,6 @@
 {
   "name": "f-xyz-list-difference",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "Difference between two arrays.",
   "main": "index.js",
   "directories": {
