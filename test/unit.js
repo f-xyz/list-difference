@@ -6,7 +6,7 @@ var a = { x: 1 };
 var b = { x: 2 };
 var c = { x: 3 };
 
-describe('unit tests', function () {
+describe('diff() tests', function () {
 
     describe('comparing with empty array', function () {
 
@@ -103,5 +103,7 @@ describe('unit tests', function () {
             });
         });
     });
+
+
 
 });
