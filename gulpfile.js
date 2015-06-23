@@ -36,7 +36,7 @@ gulp.task('browserify', ['bump'], function () {
         debug: true,
         detectGlobals: true,
         insertGlobals: false,
-        standalone: _.camelCase(require('./package.json').name)
+        standalone: _.camelCase(require('./package.json').name.replace(/f-xyz-/, ''))
     });
     return bundler
         .bundle()
