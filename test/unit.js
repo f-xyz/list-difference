@@ -75,7 +75,14 @@ describe('diff() tests', function () {
         });
     });
 
-    describe('getUniqueId tests', function () {
+    describe('working with strings', function () {
+
+        it('asd', function () {
+            console.log(diff('qwe', 'qwe'));
+        });
+    });
+
+    describe('getUniqueId() tests', function () {
 
         it('should return unique values', function () {
             var bulk = {};
@@ -92,7 +99,7 @@ describe('diff() tests', function () {
         });
     });
 
-    describe('buildHashToIndexMap tests', function () {
+    describe('buildHashToIndexMap() tests', function () {
 
         it('should make an object primaryKey => item index', function () {
             var list = [a, b, c];
@@ -103,7 +110,4 @@ describe('diff() tests', function () {
             });
         });
     });
-
-
-
 });
