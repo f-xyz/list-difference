@@ -58,8 +58,8 @@ gulp.task('test', function () {
             colors: true,
             watch: false,
             debug: true,
-            istanbul: true,
-            compilers: 'coffee:coffee-script/register'
+            istanbul: true//,
+            //compilers: 'coffee:coffee-script/register'
         }));
 });
 gulp.task('test-watch', function () {
@@ -68,8 +68,8 @@ gulp.task('test-watch', function () {
             R: 'spec',
             colors: true,
             watch: true,
-            debug: true,
-            istanbul: true,
-            compilers: 'coffee:coffee-script/register'
+            debug: true//,
+            //istanbul: true,
+            //compilers: 'coffee:coffee-script/register'
         }));
 });

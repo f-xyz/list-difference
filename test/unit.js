@@ -75,10 +75,14 @@ describe('diff() tests', function () {
         });
     });
 
-    describe('working with strings', function () {
+    describe('works with strings', function () {
 
-        it('asd', function () {
-            console.log(diff('qwe', 'qwe'));
+        it('treats string as list', function () {
+            diff('abc', 'ab').should.eql([
+                { item: 'a', state: diff.NOT_MODIFIED, oldIndex: 0, newIndex: 0 },
+                { item: 'b', state: diff.NOT_MODIFIED, oldIndex: 1, newIndex: 1 },
+                { item: 'c', state: diff.CREATED, oldIndex: -1, newIndex: 2 }
+            ]);
         });
     });
 
