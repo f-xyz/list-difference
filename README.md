@@ -1,6 +1,6 @@
 # list-difference
 
-[![Build Status](https://travis-ci.org/fantasticMrFox/list-difference.svg?branch=master)](https://travis-ci.org/fantasticMrFox/list-difference)
+[![Build Status](https://travis-ci.org/f-xyz/list-difference.svg?branch=master)](https://travis-ci.org/f-xyz/list-difference)
 
 Calculates difference between two arrays.
 
